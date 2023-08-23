@@ -6,9 +6,9 @@ module.exports = {
     target: 'node',
     mode: 'production',
     externals: [nodeExternals()],
-    entry: './src/api.ts',
+    entry: './src/app.ts',
     output: {
-        filename: 'api.js',
+        filename: 'app.js',
         path: __dirname + '/dist'
     },
     resolve: {

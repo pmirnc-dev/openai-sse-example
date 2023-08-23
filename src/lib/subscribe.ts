@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { subscriptions } from './store';
+import { setSubscriber, getSubscriber, deleteSubscriber } from './store';
 export default async function subscribe(req: Request, res: Response) {
 
   const { session } = req;
@@ -14,14 +14,14 @@ export default async function subscribe(req: Request, res: Response) {
 
   const userId = session.id;
 
-  const data = `data: ${JSON.stringify({id: userId})}\n\n`;
-  res.write(data);
-  subscriptions[userId] = res;
+  res.write(`event: open\n`);
+  res.write(`data: ${JSON.stringify({id: userId})}\n\n`);
+  setSubscriber(userId, res);
 
   req.on('close', () => {
-    console.log('close');
-    const stream = subscriptions[userId].locals.stream;
+    const stream = getSubscriber(userId)?.locals.stream;
     if (stream && stream.controller) stream.controller.abort();
-    delete subscriptions[userId];
+    deleteSubscriber(userId);
   });
+
 }

@@ -4,7 +4,7 @@ const btn = document.getElementById('btn');
 const prompt = document.getElementById('prompt');
 const conversation = document.getElementById('conversation');
 
-const source = new EventSource(`/subscribe`, {
+const source = new EventSource(`/openai`, {
     withCredentials: true,
 });
 
@@ -64,26 +64,35 @@ function init() {
     btn.disabled = false;
 }
 
+source.addEventListener('end', event => {
+    const { data } = event;
+    const { content, type, messageId, prompt } = JSON.parse(data);
+    const box = document.getElementById(`box-${ messageId }`);
+    box?.scrollIntoView(true);
+    init();
+});
 
-source.onmessage = function(event) {
+source.addEventListener('date', event => {
+    const { data } = event;
+    const { content, type, messageId, prompt } = JSON.parse(data);
+    renderDate(messageId, content);
+});
+
+source.addEventListener('open', event => {
+    console.log('open');
+});
+
+source.addEventListener('message', event => {
     try {
         const { data } = event;
         const { content, type, messageId, prompt } = JSON.parse(data);
-        if (type === 'message') {
-            messaging();
-            if (content !== undefined && messageId) renderBox(messageId, prompt, content);
-        } else if (type === 'end') {
-            const box = document.getElementById(`box-${ messageId }`);
-            box?.scrollIntoView(true);
-            init();
-        } else if (type === 'date') {
-            renderDate(messageId, content);
-        }
+        messaging();
+        if (content !== undefined && messageId) renderBox(messageId, prompt, content);
     } catch (e) {
-
         init();
     }
-}
+});
+
 
 async function openai(prompt) {
     try {
