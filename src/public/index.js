@@ -3,7 +3,7 @@ import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
 const btn = document.getElementById('btn');
 const prompt = document.getElementById('prompt');
 const conversation = document.getElementById('conversation');
-
+let processing = false;
 const source = new EventSource(`/openai`, {
     withCredentials: true,
 });
@@ -95,7 +95,9 @@ source.addEventListener('message', event => {
 
 
 async function openai(prompt) {
+    if (!processing) return;
     try {
+        processing = true;
         const { data: { messageId } } = await axios.post('/openai', {
             prompt,
         });
@@ -107,6 +109,8 @@ async function openai(prompt) {
             return;
         }
         renderBox(`${ new Date().getTime() }`, prompt, e.message.toString());
+    } finally {
+        processing = false;
     }
 }
 btn?.addEventListener('click', () => {
