@@ -95,7 +95,7 @@ source.addEventListener('message', event => {
 
 
 async function openai(prompt) {
-    if (!processing) return;
+    if (processing) return;
     try {
         processing = true;
         const { data: { messageId } } = await axios.post('/openai', {
